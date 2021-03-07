@@ -1,0 +1,32 @@
+{
+  "name": "aoife-route",
+  "version": "0.1.4",
+  "main": "umd/index.js",
+  "types": "lib/index.ts",
+  "module": "./es/index.js",
+  "exports": {
+    "require": "./umd/index.js",
+    "import": "./lib/index.ts"
+  },
+  "private": false,
+  "scripts": {
+    "es": "esbuild --define:process.env.NODE_ENV=\\\"production\\\" lib/index.ts --outdir=es --target=esnext --bundle --format=esm --jsx-factory=aoife --jsx-fragment=aoife.Frag --minify --splitting",
+    "umd": "node rollup.config.js",
+    "lib": "yarn es && yarn umd"
+  },
+  "devDependencies": {
+    "rollup": "^1.24.0",
+    "rollup-plugin-typescript2": "^0.24.3",
+    "rollup-plugin-uglify": "^6.0.3",
+    "tslib": "^2.1.0",
+    "typescript": "^4.2.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ymzuiku/aoife-route.git"
+  },
+  "bugs": {
+    "url": "git+https://github.com/ymzuiku/aoife-route.git"
+  },
+  "homepage": "git+https://github.com/ymzuiku/aoife-route.git"
+}

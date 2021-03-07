@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "noEmitHelpers": false,
+    "importHelpers": true,
+    "noResolve": false,
+    "noEmit": true,
+    "inlineSourceMap": false,
+    "declaration": false,
+    "outDir": "./umd",
+  },
+  "exclude": ["node_modules", "umd"],
+  "include": ["lib", "bindEventListen.ts"]
+}
