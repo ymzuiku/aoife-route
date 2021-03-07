@@ -53,7 +53,7 @@ Route.back 方法返回上一个页面
 Route.back();
 ```
 
-## 配合原生 JS 使用
+## 在原生 JS 中使用
 
 ```js
 import Route from "./aoife-route";
@@ -94,7 +94,7 @@ const App = () => {
 document.body.append(App());
 ```
 
-## 配合 Aoife 使用
+## 在 Aoife 中使用
 
 ```js
 import "aoife";
