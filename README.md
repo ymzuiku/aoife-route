@@ -134,4 +134,12 @@ const App = () => {
 document.body.append(<App />);
 ```
 
+## 脱离 URL 的路由
+
+url 可以是一个函数，若返回 true 就会渲染
+
+```jsx
+const ele = <Route url={() => user.isVip} render={VipPage} />;
+```
+
 ## 以上就是全部，保持简单

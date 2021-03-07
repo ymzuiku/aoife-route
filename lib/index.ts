@@ -2,7 +2,7 @@ import queryString from "./queryString";
 
 export interface AoifeRouteProps {
   root?: boolean;
-  url: string;
+  url: string | (() => boolean);
   render: any;
   preload?: boolean;
 }
@@ -43,14 +43,20 @@ const Route = ({ root, url, render, preload }: AoifeRouteProps) => {
       render();
     }
 
-    let isInRoot = false;
-    if (root && window.location.pathname === "/") {
-      isInRoot = true;
-    }
+    if (typeof url === "function") {
+      if (!url()) {
+        return renderEmpty(tar);
+      }
+    } else {
+      let isInRoot = false;
+      if (root && window.location.pathname === "/") {
+        isInRoot = true;
+      }
 
-    /** 非击中的路由 */
-    if (!isInRoot && queryString.decode(window.location.pathname) !== url) {
-      return renderEmpty(tar);
+      /** 非击中的路由 */
+      if (!isInRoot && queryString.decode(window.location.pathname) !== url) {
+        return renderEmpty(tar);
+      }
     }
 
     /** 击中的路由，但是为一个异步对象 */
@@ -65,7 +71,6 @@ const Route = ({ root, url, render, preload }: AoifeRouteProps) => {
           }
           const nextEle = v.default();
           nextEle.setAttribute("aoife-route", tar);
-          nextEle.setAttribute("aoife-route-url", url);
           old.replaceWith(nextEle);
         }
       });
@@ -73,7 +78,6 @@ const Route = ({ root, url, render, preload }: AoifeRouteProps) => {
     }
 
     out.setAttribute("aoife-route", tar);
-    out.setAttribute("aoife-route-url", url);
     return out;
   };
   listFn.push(() => {
@@ -108,6 +112,7 @@ Route.replace = (url: string, state?: any, ignoreScrollTop?: boolean) => {
     document.documentElement.scrollTo({ top: 0 });
   }
 };
+
 Route.back = () => {
   history.back();
 };
