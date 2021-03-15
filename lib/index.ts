@@ -96,18 +96,6 @@ Route.push = (url: string, state?: any, ignoreScrollTop?: boolean) => {
   if (state) {
     url += "?" + queryString.stringify(state);
   }
-  history.pushState(state, "", url);
-  window.dispatchEvent(new Event("pushState"));
-  if (!ignoreScrollTop) {
-    document.documentElement.scrollTo({ top: 0 });
-  }
-};
-Route.replace = (url: string, state?: any, ignoreScrollTop?: boolean) => {
-  if (state) {
-    url += "?" + queryString.stringify(state);
-  }
-  history.replaceState(state, "", url);
-  window.dispatchEvent(new Event("replaceState"));
   if (!ignoreScrollTop) {
     if (window.scrollTo) {
       window.scrollTo({ top: 0 });
@@ -119,6 +107,30 @@ Route.replace = (url: string, state?: any, ignoreScrollTop?: boolean) => {
       document.documentElement.scrollTo({ top: 0 });
     }
   }
+  setTimeout(() => {
+    history.pushState(state, "", url);
+    window.dispatchEvent(new Event("pushState"));
+  });
+};
+Route.replace = (url: string, state?: any, ignoreScrollTop?: boolean) => {
+  if (state) {
+    url += "?" + queryString.stringify(state);
+  }
+  if (!ignoreScrollTop) {
+    if (window.scrollTo) {
+      window.scrollTo({ top: 0 });
+    }
+    if (document.body && document.body.scrollTo) {
+      document.body.scrollTo({ top: 0 });
+    }
+    if (document.documentElement && document.documentElement.scrollTo) {
+      document.documentElement.scrollTo({ top: 0 });
+    }
+  }
+  setTimeout(() => {
+    history.replaceState(state, "", url);
+    window.dispatchEvent(new Event("replaceState"));
+  });
 };
 
 Route.back = () => {
