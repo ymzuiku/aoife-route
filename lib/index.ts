@@ -109,7 +109,15 @@ Route.replace = (url: string, state?: any, ignoreScrollTop?: boolean) => {
   history.replaceState(state, "", url);
   window.dispatchEvent(new Event("replaceState"));
   if (!ignoreScrollTop) {
-    document.documentElement.scrollTo({ top: 0 });
+    if (window.scrollTo) {
+      window.scrollTo({ top: 0 });
+    }
+    if (document.body && document.body.scrollTo) {
+      document.body.scrollTo({ top: 0 });
+    }
+    if (document.documentElement && document.documentElement.scrollTo) {
+      document.documentElement.scrollTo({ top: 0 });
+    }
   }
 };
 
