@@ -1,3 +1,5 @@
+dependencies:
+  querystring-number: 1.0.8
 devDependencies:
   fs-extra: 9.1.0
   rollup: 1.32.1
@@ -225,6 +227,10 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==
+  /querystring-number/1.0.8:
+    dev: false
+    resolution:
+      integrity: sha512-2aoUEkmBizS9Zcx1Rf9tIm42Uifw4WtvankOak+1fewWXWs8tJO09vsa1bDID3QIl1L+T6BoPxIJBqGf6JRK0w==
   /resolve/1.12.0:
     dependencies:
       path-parse: 1.0.6
@@ -334,6 +340,7 @@ packages:
       integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==
 specifiers:
   fs-extra: ^9.1.0
+  querystring-number: ^1.0.8
   rollup: ^1.24.0
   rollup-plugin-typescript2: ^0.24.3
   rollup-plugin-uglify: ^6.0.3

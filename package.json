@@ -1,6 +1,6 @@
 {
   "name": "aoife-route",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "main": "umd/index.js",
   "types": "lib/index.ts",
   "module": "./es/index.js",
@@ -29,5 +29,8 @@
   "bugs": {
     "url": "git+https://github.com/ymzuiku/aoife-route.git"
   },
-  "homepage": "git+https://github.com/ymzuiku/aoife-route.git"
+  "homepage": "git+https://github.com/ymzuiku/aoife-route.git",
+  "dependencies": {
+    "querystring-number": "^1.0.8"
+  }
 }
