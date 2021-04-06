@@ -1,6 +1,6 @@
 {
   "name": "aoife-route",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "umd/index.js",
   "types": "lib/index.ts",
   "module": "./es/index.js",
