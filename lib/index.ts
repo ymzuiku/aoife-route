@@ -77,7 +77,16 @@ const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
 
     // 对元素做一个缓存
     if (typeof url === "string" && caches[url]) {
-      return caches[url];
+      const out = caches[url];
+
+      // 兼容 aoife 更新历史页面
+      let ao = (window as any).aoife;
+      if (ao) {
+        ao.waitAppend(out).then(() => {
+          ao.next(out);
+        });
+      }
+      return out;
     }
 
     const isNeedCache = cache && !_ignoreCache && typeof url == "string";
