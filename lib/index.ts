@@ -45,11 +45,16 @@ let _ignoreCache = false;
 /** 记录上一个URL */
 let _lastUrl = "";
 const _urls = [] as { state: any; url: string }[];
+const renderFns = {} as { [key: string]: any };
 
 /** 路由 */
 const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
   if (typeof render !== "function") {
     throw "AoifeRoute.render need a Function";
+  }
+
+  if (!preload && typeof url === "string") {
+    renderFns[url] = render;
   }
 
   _n += 1;
@@ -134,6 +139,12 @@ const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
   return fn();
 };
 
+Route.preload = (url: string) => {
+  const fn = renderFns[url];
+  if (fn) {
+    fn();
+  }
+};
 Route.state = {};
 Route.queryString = queryString;
 Route.push = (
