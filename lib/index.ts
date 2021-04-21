@@ -1,7 +1,9 @@
 import queryString from "querystring-number";
 
-const isOnlyReplace = /MicroMessenger/.test(navigator.userAgent);
-// const isOnlyReplace = true;
+const ua = navigator.userAgent;
+const isIOS = /(?:iphone)/.test(ua);
+const isWechat = /MicroMessenger/.test(ua);
+const isOnlyReplace = isWechat && isIOS;
 
 export interface AoifeRouteProps {
   url: string | (() => boolean);
