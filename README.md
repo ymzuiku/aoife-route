@@ -172,4 +172,15 @@ const ele = <Route preload={1000} url={() => user.isVip} render={VipPage} />;
 Route.preload("/the-page");
 ```
 
+## 维持单一 History 长度
+
+若需要维持单一 History 长度，`Route.onlyReplace = true` 可以把把所有 push 替换为 replace，并且兼容 back.
+
+默认在 iOS 微信 中使用 replace 代替 push，可以保持更沉浸的体验.
+
+```js
+// 默认值：
+Route.onlyReplace = isIOSWechat;
+```
+
 ## 以上就是全部，保持简单

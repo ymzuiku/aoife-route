@@ -3,9 +3,6 @@ import queryString from "querystring-number";
 const ua = navigator.userAgent.toLocaleLowerCase();
 const isIOS = /(?:iphone)/.test(ua);
 const isWechat = /micromessenger/.test(ua);
-const isOnlyReplace = isWechat && isIOS;
-
-alert(isOnlyReplace);
 
 export interface AoifeRouteProps {
   url: string | (() => boolean);
@@ -148,6 +145,8 @@ const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
   return fn();
 };
 
+Route.onlyReplace = isWechat && isIOS;
+
 Route.preload = (url: string) => {
   const fn = renderFns[url];
   if (typeof fn === "function") {
@@ -166,7 +165,7 @@ Route.push = (
     ignoreCache,
   }: { ignoreScrollTop?: boolean; ignoreCache?: boolean } = {}
 ) => {
-  if (isOnlyReplace) {
+  if (Route.onlyReplace) {
     Route.replace(url, state, { ignoreCache, ignoreScrollTop });
     return;
   }
@@ -224,7 +223,7 @@ const _back = () => {
   }
 
   // 处理不增加 history 的方案返回
-  if (isOnlyReplace) {
+  if (Route.onlyReplace) {
     _urls.pop();
     if (_urls.length === 0) {
       history.replaceState({}, "", "/");
