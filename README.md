@@ -142,4 +142,34 @@ url 可以是一个函数，若返回 true 就会渲染
 const ele = <Route url={() => user.isVip} render={VipPage} />;
 ```
 
+## Cache page
+
+去到二级页面后，往往会返回一级页面，我们可以把一级页面缓存起来，当 Route.back() 后，读取历史的页面缓存以提高性能。
+
+实现以上功能，我们只需要添加 cache 属性:
+
+```jsx
+const ele = <Route cache url={() => user.isVip} render={VipPage} />;
+```
+
+## Preload page
+
+路由添加 preload 属性后会自动加载组件 chunk 代码。
+
+```jsx
+const ele = <Route preload url={() => user.isVip} render={VipPage} />;
+```
+
+默认 preload 的延迟加载为 50 ms，我们也可以主动设置一个延迟时间, 单位为 ms:
+
+```jsx
+const ele = <Route preload={1000} url={() => user.isVip} render={VipPage} />;
+```
+
+我们也可以根据代码逻辑事件主动 preload 某个 url：
+
+```jsx
+Route.preload("/the-page");
+```
+
 ## 以上就是全部，保持简单

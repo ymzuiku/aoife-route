@@ -1,15 +1,17 @@
 import queryString from "querystring-number";
 
-const ua = navigator.userAgent;
+const ua = navigator.userAgent.toLocaleLowerCase();
 const isIOS = /(?:iphone)/.test(ua);
-const isWechat = /MicroMessenger/.test(ua);
+const isWechat = /micromessenger/.test(ua);
 const isOnlyReplace = isWechat && isIOS;
+
+alert(isOnlyReplace);
 
 export interface AoifeRouteProps {
   url: string | (() => boolean);
   render: any;
   cache?: boolean;
-  preload?: boolean;
+  preload?: boolean | number;
 }
 
 const caches = {} as { [key: string]: HTMLElement };
@@ -49,6 +51,10 @@ const renderFns = {} as { [key: string]: any };
 
 /** 路由 */
 const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
+  // if (url === "/" && url !== Route.rootURL) {
+  //   Route.push(Route.rootURL);
+  //   return renderEmpty("/__rootURL");
+  // }
   if (typeof render !== "function") {
     throw "AoifeRoute.render need a Function";
   }
@@ -63,7 +69,10 @@ const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
   const fn = () => {
     /** 预渲染 */
     if (preload) {
-      render();
+      const time = typeof preload === "number" ? preload : 50;
+      setTimeout(() => {
+        render();
+      }, time);
     }
 
     if (typeof url === "function") {
@@ -141,8 +150,10 @@ const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
 
 Route.preload = (url: string) => {
   const fn = renderFns[url];
-  if (fn) {
+  if (typeof fn === "function") {
     fn();
+    // 每个 url，preload 只需要加载一次执行一次
+    renderFns[url] = true;
   }
 };
 Route.state = {};
@@ -203,7 +214,7 @@ Route.replace = (
   });
 };
 
-Route.back = () => {
+const _back = () => {
   _lastUrl = location.pathname;
   // 若在第一个页面，点返回，重新渲染 '/'
   if (_urls.length === 0) {
@@ -228,5 +239,29 @@ Route.back = () => {
 
   history.back();
 };
+
+const __back = (num = 1, callback?: Function) => {
+  if (num <= 0) {
+    if (callback) {
+      setTimeout(() => {
+        callback();
+      });
+    }
+    return;
+  }
+  num -= 1;
+  _back();
+  setTimeout(() => {
+    __back(num, callback);
+  });
+};
+
+Route.back = (num = 1) => {
+  return new Promise((res) => {
+    __back(num, res);
+  });
+};
+
+Route.rootURL = "/";
 
 export default Route;
