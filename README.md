@@ -142,14 +142,16 @@ url 可以是一个函数，若返回 true 就会渲染
 const ele = <Route url={() => user.isVip} render={VipPage} />;
 ```
 
-## Cache page
+## Keep page
 
-去到二级页面后，往往会返回一级页面，我们可以把一级页面缓存起来，当 Route.back() 后，读取历史的页面缓存以提高性能。
+去到下级页面后，往往会返回上级页面，我们可以把上级页面缓存起来(仅修改 display: none)，当 Route.back() 后，显示上一页数据，这样可以保留元素原有的状态，包括滚动情况，更贴近移动端体验，并且可以提高返回一页的性能，节约了重新渲染上一页的开销。
 
-实现以上功能，我们只需要添加 cache 属性:
+注意，当应用层级很深，并且 keep 的页面足够多（大于 10-20 层），页面保持的元素会过多，导致性能下降。
+
+实现以上功能，我们只需要添加 keep 属性:
 
 ```jsx
-const ele = <Route cache url={() => user.isVip} render={VipPage} />;
+const ele = <Route keep url={() => user.isVip} render={VipPage} />;
 ```
 
 ## Preload page

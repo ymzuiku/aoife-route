@@ -7,11 +7,11 @@ const isWechat = /micromessenger/.test(ua);
 export interface AoifeRouteProps {
   url: string | (() => boolean);
   render: any;
-  cache?: boolean;
+  keep?: boolean;
   preload?: boolean | number;
 }
 
-const caches = {} as { [key: string]: HTMLElement };
+const keepTags = {} as { [key: string]: string };
 
 /** 添加 window.listen */
 const listFn = [] as any[];
@@ -19,39 +19,51 @@ const listFn = [] as any[];
 ["popstate", "pushState", "replaceState", "backState"].forEach((v) => {
   window.addEventListener(v, () => {
     Route.state = queryString.parse(location.search);
-    listFn.forEach((fn) => fn());
     if (v === "popstate" || v === "backState") {
-      delete caches[_lastUrl];
+      delete keepTags[_lastUrl];
     }
+    listFn.forEach((fn) => fn());
     if (v === "popstate") {
       _urls.pop();
     }
   });
 });
 
+// 记录是否渲染过
+// const renderdedList = {} as any;
+
 /** 渲染空元素 */
 function renderEmpty(tar: string) {
   const span = document.createElement("span");
   span.style.display = "none";
   span.setAttribute("aoife-route", tar);
+  span.setAttribute("aoife-route-empty", tar);
+
+  // 若没渲染过，添加first标签
+  // if (!renderdedList[tar]) {
+  //   renderdedList[tar] = true;
+  //   span.setAttribute("aoife-route-first", tar);
+  // }
+
   return span;
+}
+
+function checkIsUrl(url: any) {
+  if (typeof url === "function") {
+    return url();
+  }
+  return queryString.decode(window.location.pathname) === url;
 }
 
 /** 路由编码 */
 let _n = 0;
-/** 忽略页面缓存 */
-let _ignoreCache = false;
 /** 记录上一个URL */
 let _lastUrl = "";
 const _urls = [] as { state: any; url: string }[];
 const renderFns = {} as { [key: string]: any };
 
 /** 路由 */
-const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
-  // if (url === "/" && url !== Route.rootURL) {
-  //   Route.push(Route.rootURL);
-  //   return renderEmpty("/__rootURL");
-  // }
+const Route = ({ url, render, preload, keep }: AoifeRouteProps) => {
   if (typeof render !== "function") {
     throw "AoifeRoute.render need a Function";
   }
@@ -72,38 +84,29 @@ const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
       }, time);
     }
 
-    if (typeof url === "function") {
-      if (!url()) {
-        return renderEmpty(tar);
+    const lastTar = keepTags[url as any];
+
+    // 若有元素缓存，直接读取
+    if (typeof url === "string" && lastTar) {
+      const old = document.querySelector(`[aoife-route="${lastTar}"]`) as any;
+      if (!old.__display) {
+        old.__display = window.getComputedStyle
+          ? window.getComputedStyle(old).display
+          : "block";
       }
-    } else {
-      // let isInRoot = false;
-      // if (root && window.location.pathname === "/") {
-      //   isInRoot = true;
-      // }
-      // /** 非击中的路由 */
-      if (queryString.decode(window.location.pathname) !== url) {
-        return renderEmpty(tar);
+      if (checkIsUrl(url)) {
+        old.style.display = old.__display;
+      } else {
+        old.style.display = "none";
       }
-      // return renderEmpty(tar);
+      return old;
     }
 
-    // 对元素做一个缓存
-    if (typeof url === "string" && caches[url]) {
-      const out = caches[url];
-
-      // 兼容 aoife 更新历史页面
-      let ao = (window as any).aoife;
-      if (ao) {
-        ao.waitAppend(out).then(() => {
-          ao.next(out);
-        });
-      }
-      return out;
+    if (!checkIsUrl(url)) {
+      return renderEmpty(tar);
     }
 
-    const isNeedCache = cache && !_ignoreCache && typeof url == "string";
-    _ignoreCache = false;
+    const isNeedKeep = keep && typeof url == "string";
 
     /** 击中的路由，但是为一个异步对象 */
     const out = render();
@@ -117,9 +120,9 @@ const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
           }
           const nextEle = v.default();
           nextEle.setAttribute("aoife-route", tar);
-          // 对元素做一个缓存
-          if (isNeedCache) {
-            caches[url as string] = nextEle;
+          // 对元素tar做一个缓存
+          if (isNeedKeep) {
+            keepTags[url as string] = tar;
           }
           old.replaceWith(nextEle);
         }
@@ -129,18 +132,31 @@ const Route = ({ url, render, preload, cache }: AoifeRouteProps) => {
 
     out.setAttribute("aoife-route", tar);
 
-    // 对元素做一个缓存
-    if (isNeedCache) {
-      caches[url as string] = out;
+    // 对元素tar做一个缓存
+    if (isNeedKeep) {
+      keepTags[url as string] = tar;
     }
     return out;
   };
+
+  // 添加监听，每当 listing 时，尝试获取新的子组件并重新替换当前
   listFn.push(() => {
-    const old = document.querySelector(`[aoife-route="${tar}"]`);
+    const old = document.querySelector(`[aoife-route="${tar}"]`) as HTMLElement;
     if (!old) {
       return;
     }
-    old.replaceWith(fn());
+    const nextEl = fn() as HTMLElement;
+    // 若两个都是空路由，不进行dom替换
+    if (
+      nextEl.getAttribute("aoife-route-empty") &&
+      old.getAttribute("aoife-route-empty")
+    ) {
+      return;
+    }
+    if (nextEl === old) {
+      return;
+    }
+    old.replaceWith(nextEl);
   });
   return fn();
 };
@@ -155,59 +171,37 @@ Route.preload = (url: string) => {
     renderFns[url] = true;
   }
 };
+
 Route.state = {};
 Route.queryString = queryString;
-Route.push = (
-  url: string,
-  state?: any,
-  {
-    ignoreScrollTop,
-    ignoreCache,
-  }: { ignoreScrollTop?: boolean; ignoreCache?: boolean } = {}
-) => {
+Route.push = (url: string, state?: any) => {
+  // saveOldScrollTop();
   if (Route.onlyReplace) {
-    Route.replace(url, state, { ignoreCache, ignoreScrollTop });
+    Route.replace(url, state);
     return;
   }
   _urls.push({ state, url });
   if (state) {
     url += "?" + queryString.stringify(state);
   }
-  if (!ignoreScrollTop) {
-    if (window.scrollTo) {
-      window.scrollTo({ top: 0 });
-    }
+  if (window.scrollTo) {
+    window.scrollTo({ top: 0 });
   }
   setTimeout(() => {
-    if (ignoreCache) {
-      _ignoreCache = true;
-    }
     history.pushState(state, "", url);
     window.dispatchEvent(new Event("pushState"));
   });
 };
-Route.replace = (
-  url: string,
-  state?: any,
-  {
-    ignoreScrollTop,
-    ignoreCache,
-  }: { ignoreScrollTop?: boolean; ignoreCache?: boolean } = {}
-) => {
+Route.replace = (url: string, state?: any) => {
   _urls.push({ state, url });
 
   if (state) {
     url += "?" + queryString.stringify(state);
   }
-  if (!ignoreScrollTop) {
-    if (window.scrollTo) {
-      window.scrollTo({ top: 0 });
-    }
+  if (window.scrollTo) {
+    window.scrollTo({ top: 0 });
   }
   setTimeout(() => {
-    if (ignoreCache) {
-      _ignoreCache = true;
-    }
     history.replaceState(state, "", url);
     window.dispatchEvent(new Event("replaceState"));
   });
